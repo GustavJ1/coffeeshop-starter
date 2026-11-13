@@ -1,7 +1,9 @@
 package ek.osnb.demo.coffeeshop.customer;
 
+import ek.osnb.demo.coffeeshop.common.NotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,6 +35,22 @@ class CustomerController {
     @GetMapping("/{id}")
     CustomerResponse findById(@PathVariable Long id) {
         return service.findById(id);
+    }
+    @GetMapping("/me")
+    CustomerResponse getProfile(Authentication authentication){
+        String email = authentication.getName();
+
+        return service.findCustomerByEmail(email)
+                .map(service -> new CustomerResponse(
+                        service.id(),
+                        service.email(),
+                        service.name(),
+                        service.street(),
+                        service.postalCode(),
+                        service.city()
+                ))
+                .orElseThrow(()-> new NotFoundException("customer not found"));
+
     }
 
     // GET /api/customers?email=anna@example.com - email is required,

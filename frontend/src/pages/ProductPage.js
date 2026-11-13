@@ -1,4 +1,4 @@
-// pages/ProductPage.js
+21// pages/ProductPage.js
 
 import { addToCart } from "../cart.js";
 import { createButton } from "../components/Button.js";
