@@ -10,6 +10,7 @@ import ek.osnb.demo.coffeeshop.common.NotFoundException;
 import ek.osnb.demo.coffeeshop.customer.CustomerApi;
 import ek.osnb.demo.coffeeshop.customer.CustomerInfo;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,8 +57,8 @@ class OrderService implements OrderApi {
     // Everything in here happens in one transaction: if any step fails (e.g. one
     // product is out of stock), nothing is saved - no stock is taken, no order is
     // created and the cart keeps its items.
-    OrderResponse placeOrder(PlaceOrderRequest request) {
-        CustomerInfo customer = customers.getCustomer(request.customerId());
+    OrderResponse placeOrder(String email, PlaceOrderRequest request) {
+       Optional<CustomerInfo> customer = customers.findCustomerByEmail(email);
         CartInfo cart = carts.getCart(request.cartId());
 
         if (cart.isEmpty()) {
@@ -87,9 +88,9 @@ class OrderService implements OrderApi {
         }
 
         ShippingAddress address = new ShippingAddress(
-                customer.name(), customer.street(), customer.postalCode(), customer.city());
+                customer.get().name(), customer.get().street(), customer.get().postalCode(), customer.get().city());
 
-        Order order = repository.save(Order.place(customer.id(), address, lines, Instant.now()));
+        Order order = repository.save(Order.place(customer.get().id(), address, lines, Instant.now()));
 
         carts.clearCart(cart.id());
 
