@@ -43,14 +43,21 @@ class CustomerController {
         return service.findCustomerByEmail(email)
                 .map(service -> new CustomerResponse(
                         service.id(),
-                        service.email(),
                         service.name(),
+                        service.email(),
                         service.street(),
                         service.postalCode(),
                         service.city()
                 ))
                 .orElseThrow(()-> new NotFoundException("customer not found"));
 
+    }
+    @PutMapping("/me")
+    CustomerResponse updateProfile(Authentication authentication,
+                                   @Valid
+                                   @RequestBody CustomerProfileRequest request){
+    String email = authentication.getName();
+    return service.saveProfile(email,request);
     }
 
     // GET /api/customers?email=anna@example.com - email is required,

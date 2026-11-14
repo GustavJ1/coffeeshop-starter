@@ -97,4 +97,4 @@ ids or emails to find a customer (`?email=`, `?customerId=`, `/api/customers/{id
 
 - **The model can only find what a tool lets it ask for.** `CatalogApi.searchProducts` searches
   names and origins, so "light roasts" finds nothing unless your tool can filter by roast level.
-
+d

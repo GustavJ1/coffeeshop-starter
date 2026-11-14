@@ -38,6 +38,32 @@ class CustomerService implements CustomerApi {
     CustomerResponse findById(Long id) {
         return CustomerMapper.toResponse(findCustomer(id));
     }
+    CustomerResponse saveProfile(String email, CustomerProfileRequest request) {
+        String normalizedEmail = Customer.normalizeEmail(email);
+
+        Customer customer = repository.findByEmail(normalizedEmail).orElse(null);
+
+        if (customer == null) {
+            customer = Customer.create(
+                    request.name(),
+                    normalizedEmail,
+                    request.street(),
+                    request.postalCode(),
+                    request.city()
+            );
+        } else {
+            customer.updateDetails(
+                    request.name(),
+                    normalizedEmail,
+                    request.street(),
+                    request.postalCode(),
+                    request.city()
+            );
+        }
+
+        Customer savedCustomer = repository.save(customer);
+        return CustomerMapper.toResponse(savedCustomer);
+    }
 
     // A list with zero or one customer. A stand-in for logging in until the
     // app has Spring Security: anyone who knows an email can find the customer.
