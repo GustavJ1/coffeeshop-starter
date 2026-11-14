@@ -10,7 +10,6 @@ import ek.osnb.demo.coffeeshop.common.NotFoundException;
 import ek.osnb.demo.coffeeshop.customer.CustomerApi;
 import ek.osnb.demo.coffeeshop.customer.CustomerInfo;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,7 +56,7 @@ class OrderService implements OrderApi {
     // Everything in here happens in one transaction: if any step fails (e.g. one
     // product is out of stock), nothing is saved - no stock is taken, no order is
     // created and the cart keeps its items.
-    OrderResponse placeOrder(String email, PlaceOrderRequest request) {
+    OrderResponse placeOrder(String email, PlaceOrderRequest request)   {
        Optional<CustomerInfo> customer = customers.findCustomerByEmail(email);
         CartInfo cart = carts.getCart(request.cartId());
 
@@ -116,8 +115,14 @@ class OrderService implements OrderApi {
     }
 
     @Transactional(readOnly = true)
-    OrderResponse findById(Long id) {
-        return OrderMapper.toResponse(findOrder(id));
+    OrderResponse findById(String email, Long orderId) {
+        CustomerInfo customer = customers.findCustomerByEmail(email)
+                .orElseThrow(() -> new NotFoundException("Customer profile not found"));
+
+        Order order = repository.findByIdAndCustomerId(orderId, customer.id())
+                .orElseThrow(() -> new NotFoundException("Order not found: " + orderId));
+
+        return OrderMapper.toResponse(order);
     }
 
     OrderResponse cancel(Long id) {

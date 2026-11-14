@@ -39,8 +39,8 @@ class OrderController {
     }
 
     @GetMapping("/{id}")
-    OrderResponse findById(@PathVariable Long id) {
-        return service.findById(id);
+    OrderResponse findById(Authentication authentication, @PathVariable Long id) {
+        return service.findById(authentication.getName(), id);
     }
 
     @PostMapping("/{id}/cancel")
